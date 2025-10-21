@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     db_schema: str = Field(default="tms_schema", alias="DB_SCHEMA")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     
+    # Authentication credentials
+    auth_username: str = Field(default="DemoUser", alias="AUTH_USERNAME")
+    auth_password: str = Field(default="DemoPass123", alias="AUTH_PASSWORD")
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

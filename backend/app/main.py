@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.config import settings
-from app.routers import hybrid_search
+from app.routers import hybrid_search, auth
+from app.services.auth import AuthService
 
 
 @asynccontextmanager
@@ -34,7 +36,34 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     
+    # Authentication middleware
+    @app.middleware("http")
+    async def auth_middleware(request: Request, call_next):
+        # Public endpoints that don't require authentication
+        public_paths = ["/", "/health", "/docs", "/openapi.json", "/api/v1/auth/login", "/api/v1/auth/logout"]
+        
+        if request.url.path in public_paths or request.url.path.startswith("/docs"):
+            return await call_next(request)
+        
+        # Check for auth token in cookies
+        auth_token = request.cookies.get("auth_token")
+        if not auth_token:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": "Not authenticated"}
+            )
+        
+        # Verify token
+        if not AuthService.verify_token(auth_token):
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"detail": "Invalid or expired token"}
+            )
+        
+        return await call_next(request)
+    
     # Include routers with /api/v1 prefix
+    app.include_router(auth.router, prefix="/api/v1")
     app.include_router(hybrid_search.router, prefix="/api/v1")
     
     @app.get("/")

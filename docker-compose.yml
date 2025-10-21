@@ -41,6 +41,8 @@ services:
       DEBUG: 'false'
       DB_SCHEMA: 'hybrid_search'
       OPENAI_API_KEY: '${OPENAI_API_KEY:-your-openai-api-key-here}'
+      AUTH_USERNAME: '${AUTH_USERNAME:-DemoUser}'
+      AUTH_PASSWORD: '${AUTH_PASSWORD:-DemoPass123}'
     expose:
       - "8000"
     restart: always
