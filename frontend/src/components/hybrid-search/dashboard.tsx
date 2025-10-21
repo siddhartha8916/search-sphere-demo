@@ -2,13 +2,14 @@
 
 import { useState, useCallback } from 'react'
 import Image from 'next/image'
-import { Search, Upload, FileText, Sparkles, Database, Zap } from 'lucide-react'
+import { Search, Upload, FileText, Sparkles, Database, Zap, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { useSearch } from '@/hooks/useHybridSearch'
+import { useAuth } from '@/contexts/AuthContext'
 import { FileUpload } from './file-upload'
 import { AttachmentViewer } from './attachment-viewer'
 
@@ -37,6 +38,11 @@ export function HybridSearchDashboard() {
   
   // Use real API hooks
   const { search, isSearching, searchError, searchResults } = useSearch()
+  const { logout } = useAuth()
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return
@@ -99,6 +105,14 @@ export function HybridSearchDashboard() {
             >
               <FileText className="h-4 w-4" />
               View Files
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2 border-border text-foreground hover:bg-destructive hover:text-white transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
             </Button>
           </div>
         </div>
