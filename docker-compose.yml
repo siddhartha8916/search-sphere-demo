@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   hybrid-search-db:
     build:
@@ -43,8 +41,8 @@ services:
       DEBUG: 'false'
       DB_SCHEMA: 'hybrid_search'
       OPENAI_API_KEY: '${OPENAI_API_KEY:-your-openai-api-key-here}'
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     restart: always
 
   hybrid-search-frontend:
@@ -54,9 +52,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      # Use backend service name for Docker networking
-      NEXT_PUBLIC_BACKEND_URL: 'http://hybrid-search-backend:8000'
     restart: always
     depends_on:
       - hybrid-search-backend

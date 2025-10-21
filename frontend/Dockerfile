@@ -1,60 +1,59 @@
-# Frontend Dockerfile for SearchSphere (Next.js)
-FROM node:18-alpine AS base
+# syntax=docker.io/docker/dockerfile:1
 
-# Install dependencies only when needed
-FROM base AS deps
+# Step 1: Dependencies Stage
+FROM node:18-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json* pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* ./
 
 # Install dependencies based on lockfile
-RUN \
-  if [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
 
-# Build the application
-FROM base AS builder
+# Step 2: Builder Stage
+FROM node:18-alpine AS builder
 WORKDIR /app
+
+# Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
 COPY . .
 
-# Set environment variables for build
+# Set environment variable for standalone build
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build Next.js app
-RUN npm run build
+# Build the application (creates .next/standalone)
+RUN corepack enable pnpm && pnpm run build
 
-# Production image
-FROM base AS runner
+# Step 3: Runner Stage (Minimal Production Image)
+FROM node:18-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-# Create non-root user
+# Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built files and dependencies
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# Set to production environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
+# Copy standalone output (contains only necessary files)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+
+# Copy static files (if not using CDN)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Switch to non-root user
 USER nextjs
 
+# Expose the application port
 EXPOSE 3000
 
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
-# Use Next.js start command
-CMD ["npm", "run", "start"]
-
+# Start the application using the standalone server
+CMD ["node", "server.js"]
