@@ -18,11 +18,11 @@ CREATE SCHEMA IF NOT EXISTS hybrid_search;
 DROP TABLE IF EXISTS hybrid_search.attachments CASCADE;
 
 -- Attachments table for uploaded documents with hybrid search support
-CREATE TABLE hybrid_search.attachments (
+CREATE TABLE attachments (
     id SERIAL PRIMARY KEY,
     file_name VARCHAR(500) NOT NULL,
     content TEXT NOT NULL,
-    embedding vector(384),  -- OpenAI text-embedding-3-small or sentence-transformers dimension
+    embedding vector(1536),  -- OpenAI text-embedding-3-small or sentence-transformers dimension
     content_length INTEGER GENERATED ALWAYS AS (length(content)) STORED,
     uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -31,17 +31,17 @@ CREATE TABLE hybrid_search.attachments (
 -- Create indexes for efficient search
 -- PGroonga index for full-text search
 CREATE INDEX idx_attachments_content_pgroonga 
-    ON hybrid_search.attachments 
+    ON attachments 
     USING pgroonga (content);
 
 -- Vector index for semantic search (HNSW for faster approximate nearest neighbor search)
 CREATE INDEX idx_attachments_embedding_hnsw 
-    ON hybrid_search.attachments 
+    ON attachments 
     USING hnsw (embedding vector_cosine_ops);
 
 -- Standard B-tree index on file_name for filtering
 CREATE INDEX idx_attachments_file_name 
-    ON hybrid_search.attachments (file_name);
+    ON attachments (file_name);
 
 -- Index on uploaded_at for time-based queries
 CREATE INDEX idx_attachments_uploaded_at 
