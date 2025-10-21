@@ -3,7 +3,7 @@
  * Provides functions to interact with the FastAPI backend
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_BASE_URL = "/"
 
 export interface ApiSearchResult {
   id: string
@@ -60,7 +60,7 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
   const formData = new FormData()
   formData.append('file', file)
 
-  const response = await fetch(`${API_BASE_URL}/hybrid-search/upload`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/hybrid-search/upload`, {
     method: 'POST',
     body: formData,
   })
@@ -85,7 +85,7 @@ export async function searchDocuments(
     mode: mode
   })
 
-  const response = await fetch(`${API_BASE_URL}/hybrid-search/search?${params}`)
+  const response = await fetch(`${API_BASE_URL}/api/v1/hybrid-search/search?${params}`)
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Search failed' }))
@@ -99,9 +99,9 @@ export async function searchDocuments(
  * Get list of uploaded attachments
  */
 export async function getAttachments(): Promise<AttachmentsResponse> {
-  console.log('Fetching attachments from:', `${API_BASE_URL}/hybrid-search/attachments`)
+  console.log('Fetching attachments from:', `${API_BASE_URL}/api/v1/hybrid-search/attachments`)
   
-  const response = await fetch(`${API_BASE_URL}/hybrid-search/attachments`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/hybrid-search/attachments`, {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
@@ -126,7 +126,7 @@ export async function getAttachments(): Promise<AttachmentsResponse> {
  * Delete an attachment
  */
 export async function deleteAttachment(attachmentId: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/hybrid-search/attachments/${attachmentId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/v1/hybrid-search/attachments/${attachmentId}`, {
     method: 'DELETE'
   })
 
@@ -146,7 +146,7 @@ export async function checkApiHealth(): Promise<{ status: string }> {
       throw new Error('Health check failed')
     }
     return response.json()
-  } catch (error) {
+  } catch {
     return { status: 'unavailable' }
   }
 }

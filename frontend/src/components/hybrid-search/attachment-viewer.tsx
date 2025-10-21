@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { FileText, Download, Trash2, X, File, Image } from 'lucide-react'
+import { FileText, Download, Trash2, X, File, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAttachments } from '@/hooks/useHybridSearch'
@@ -37,7 +37,7 @@ export function AttachmentViewer({ open, onClose }: AttachmentViewerProps) {
       case 'jpg':
       case 'jpeg':
       case 'gif':
-        return <Image className="h-5 w-5 text-green-500" />
+        return <ImageIcon className="h-5 w-5 text-green-500" />
       default:
         return <File className="h-5 w-5 text-gray-500" />
     }

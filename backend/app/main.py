@@ -34,8 +34,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     
-    # Include routers
-    app.include_router(hybrid_search.router)
+    # Include routers with /api/v1 prefix
+    app.include_router(hybrid_search.router, prefix="/api/v1")
     
     @app.get("/")
     async def root():

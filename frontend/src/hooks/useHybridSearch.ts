@@ -9,8 +9,7 @@ import {
   getAttachments, 
   deleteAttachment,
   type ApiSearchResult,
-  type ApiAttachment,
-  type SearchResponse 
+  type ApiAttachment
 } from '@/lib/api'
 
 export function useFileUpload() {

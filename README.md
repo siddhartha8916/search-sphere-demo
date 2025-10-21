@@ -10,12 +10,23 @@ A hybrid search engine that combines keyword matching with AI-powered semantic s
 # Clone and start with Docker
 git clone <repository-url>
 cd hybrid-search-demo
+
+# Set your OpenAI API key (required)
+export OPENAI_API_KEY=your-api-key-here  # Linux/Mac
+# or
+set OPENAI_API_KEY=your-api-key-here     # Windows
+
 docker-compose up -d
 ```
 
 **Access:**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000/docs
+
+**Environment Variables:**
+- `OPENAI_API_KEY` - Required for backend embedding generation
+- `NEXT_PUBLIC_BACKEND_URL` - Backend URL (auto-configured in Docker)
+
 
 ## How It Works
 

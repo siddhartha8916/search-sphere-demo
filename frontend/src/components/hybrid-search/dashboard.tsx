@@ -214,7 +214,7 @@ export function HybridSearchDashboard() {
                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="text-left">
                     <h2 className="text-xl font-semibold text-foreground mb-2">
-                      Search Results for "{searchQuery}"
+                      Search Results for &ldquo;{searchQuery}&rdquo;
                     </h2>
                     <p className="text-muted-foreground text-sm">
                       Found {searchResults.length} results using {searchMode} search

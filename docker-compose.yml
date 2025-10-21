@@ -28,37 +28,39 @@ services:
           cpus: "0.2"
           memory: 300M
 
-  # hybrid-search-backend:
-  #   container_name: hybrid-search-backend-container
-  #   build:
-  #     context: ./backend
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     hybrid-search-db:
-  #       condition: service_healthy
-  #   environment:
-  #     DATABASE_URL: postgresql+asyncpg://tms_user:tms_pwd@hybrid-search-db:5432/ultraship_tms_db
-  #     APP_NAME: 'Hybrid Search Backend API'
-  #     APP_VERSION: '1.0.0'
-  #     DEBUG: 'false'
-  #     DB_SCHEMA: 'tms_schema'
-  #     OPENAI_API_KEY: '${OPENAI_API_KEY:-your-openai-api-key-here}'
-  #   ports:
-  #     - "8000:8000"
-  #   restart: always
+  hybrid-search-backend:
+    container_name: hybrid-search-backend-container
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      hybrid-search-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://hybrid_search_user:hybrid_search_pwd@hybrid-search-db:5432/hybrid_search_db
+      APP_NAME: 'SearchSphere Backend API'
+      APP_VERSION: '1.0.0'
+      DEBUG: 'false'
+      DB_SCHEMA: 'hybrid_search'
+      OPENAI_API_KEY: '${OPENAI_API_KEY:-your-openai-api-key-here}'
+    ports:
+      - "8000:8000"
+    restart: always
 
-  # hybrid-search-frontend:
-  #   container_name: hybrid-search-frontend-container
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "3000:3000"
-  #   environment:
-  #     NEXT_PUBLIC_API_URL: 'http://hybrid-search-backend:8000'
-  #   restart: always
-  #   depends_on:
-  #     - hybrid-search-backend
+  hybrid-search-frontend:
+    container_name: hybrid-search-frontend-container
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # Use backend service name for Docker networking
+      NEXT_PUBLIC_BACKEND_URL: 'http://hybrid-search-backend:8000'
+    restart: always
+    depends_on:
+      - hybrid-search-backend
 
 volumes:
   db-data:
+
