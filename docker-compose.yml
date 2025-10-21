@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  hybrid-search-db:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGPORT: 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      timeout: 15s
+      interval: 10s
+      retries: 5
+    ports:
+      - 5432:5432
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: 500M
+        reservations:
+          cpus: "0.2"
+          memory: 300M
+
+  # hybrid-search-backend:
+  #   container_name: hybrid-search-backend-container
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     hybrid-search-db:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: postgresql+asyncpg://tms_user:tms_pwd@hybrid-search-db:5432/ultraship_tms_db
+  #     APP_NAME: 'Hybrid Search Backend API'
+  #     APP_VERSION: '1.0.0'
+  #     DEBUG: 'false'
+  #     DB_SCHEMA: 'tms_schema'
+  #     OPENAI_API_KEY: '${OPENAI_API_KEY:-your-openai-api-key-here}'
+  #   ports:
+  #     - "8000:8000"
+  #   restart: always
+
+  # hybrid-search-frontend:
+  #   container_name: hybrid-search-frontend-container
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: 'http://hybrid-search-backend:8000'
+  #   restart: always
+  #   depends_on:
+  #     - hybrid-search-backend
+
+volumes:
+  db-data:
