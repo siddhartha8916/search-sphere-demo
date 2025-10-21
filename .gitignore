@@ -68,3 +68,6 @@ generated
 
 # docker volumes
 docker-volumes
+
+*.tar
+docker-compose-prod.yml
