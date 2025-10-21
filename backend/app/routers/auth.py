@@ -1,7 +1,8 @@
 """
 Authentication router for login/logout
 """
-from fastapi import APIRouter, HTTPException, status, Response
+from fastapi import APIRouter, HTTPException, status, Response, Cookie
+from typing import Optional
 from pydantic import BaseModel
 from app.services.auth import AuthService
 
@@ -18,6 +19,11 @@ class LoginResponse(BaseModel):
     success: bool
     message: str
     username: str
+
+
+class VerifyResponse(BaseModel):
+    authenticated: bool
+    username: Optional[str] = None
 
 
 @router.post("/login", response_model=LoginResponse)
@@ -54,6 +60,27 @@ async def login(login_data: LoginRequest, response: Response):
         message="Login successful",
         username=login_data.username
     )
+
+
+@router.get("/verify", response_model=VerifyResponse)
+async def verify(auth_token: Optional[str] = Cookie(None)):
+    """
+    Verify the authentication cookie
+    Returns authentication status and username if authenticated
+    """
+    if not auth_token:
+        return VerifyResponse(authenticated=False)
+    
+    # Verify token
+    if not AuthService.verify_token(auth_token):
+        return VerifyResponse(authenticated=False)
+    
+    # Extract username from token
+    try:
+        username = auth_token.split("_", 1)[0]
+        return VerifyResponse(authenticated=True, username=username)
+    except:
+        return VerifyResponse(authenticated=False)
 
 
 @router.post("/logout")

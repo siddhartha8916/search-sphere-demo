@@ -109,7 +109,7 @@ export function AttachmentViewer({ open, onClose }: AttachmentViewerProps) {
                 <Card key={attachment.id} className="hover:shadow-md transition-shadow duration-200">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="shrink-0 mt-1">
                         {getFileIcon(attachment.filename)}
                       </div>
                       <div className="flex-1 min-w-0">

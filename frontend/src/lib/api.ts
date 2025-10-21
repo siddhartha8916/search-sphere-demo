@@ -61,6 +61,7 @@ export async function uploadFile(file: File): Promise<UploadResponse> {
   const response = await fetch(`/api/v1/hybrid-search/upload`, {
     method: "POST",
     body: formData,
+    credentials: "include", // Send cookies
   });
 
   if (!response.ok) {
@@ -85,7 +86,9 @@ export async function searchDocuments(
     mode: mode,
   });
 
-  const response = await fetch(`/api/v1/hybrid-search/search?${params}`);
+  const response = await fetch(`/api/v1/hybrid-search/search?${params}`, {
+    credentials: "include", // Send cookies
+  });
 
   if (!response.ok) {
     const errorData = await response
@@ -112,6 +115,7 @@ export async function getAttachments(): Promise<AttachmentsResponse> {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
+    credentials: "include", // Send cookies
   });
 
   console.log("Attachments API response status:", response.status);
@@ -140,6 +144,7 @@ export async function deleteAttachment(attachmentId: string): Promise<void> {
     `/api/v1/hybrid-search/attachments/${attachmentId}`,
     {
       method: "DELETE",
+      credentials: "include", // Send cookies
     }
   );
 
@@ -156,7 +161,9 @@ export async function deleteAttachment(attachmentId: string): Promise<void> {
  */
 export async function checkApiHealth(): Promise<{ status: string }> {
   try {
-    const response = await fetch(`/health`);
+    const response = await fetch(`/health`, {
+      credentials: "include", // Send cookies
+    });
     if (!response.ok) {
       throw new Error("Health check failed");
     }

@@ -1,10 +1,12 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
+  username: string | null;
   login: () => void;
   logout: () => Promise<void>;
 }
@@ -13,21 +15,51 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Check authentication status on mount
+  // Check authentication status on mount and when pathname changes
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [pathname]);
 
   const checkAuth = async () => {
     try {
       const response = await fetch("/api/v1/auth/verify", {
         credentials: "include",
       });
-      setIsAuthenticated(response.ok);
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          setUsername(data.username || null);
+        } else {
+          setIsAuthenticated(false);
+          setUsername(null);
+          // Redirect to login if not on login page
+          if (pathname !== "/login") {
+            router.push("/login");
+          }
+        }
+      } else {
+        setIsAuthenticated(false);
+        setUsername(null);
+        // Redirect to login if not on login page
+        if (pathname !== "/login") {
+          router.push("/login");
+        }
+      }
     } catch (error) {
+      console.error("Auth check error:", error);
       setIsAuthenticated(false);
+      setUsername(null);
+      // Redirect to login if not on login page
+      if (pathname !== "/login") {
+        router.push("/login");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -35,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = () => {
     setIsAuthenticated(true);
+    checkAuth(); // Refresh auth state to get username
   };
 
   const logout = async () => {
@@ -47,11 +80,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout error:", error);
     } finally {
       setIsAuthenticated(false);
+      setUsername(null);
+      router.push("/login");
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, username, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

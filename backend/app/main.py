@@ -40,13 +40,14 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def auth_middleware(request: Request, call_next):
         # Public endpoints that don't require authentication
-        public_paths = ["/", "/health", "/docs", "/openapi.json", "/api/v1/auth/login", "/api/v1/auth/logout"]
+        public_paths = ["/", "/health", "/docs", "/openapi.json", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/verify"]
         
         if request.url.path in public_paths or request.url.path.startswith("/docs"):
             return await call_next(request)
         
         # Check for auth token in cookies
         auth_token = request.cookies.get("auth_token")
+        print(f"Auth token from cookie: {auth_token}")
         if not auth_token:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
